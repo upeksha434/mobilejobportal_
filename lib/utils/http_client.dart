@@ -31,14 +31,14 @@ class HttpClient {
   }
   static Future<HttpResponse> getServices(Map data) async {
     try {
-      print('getServices');
-      print(data);
+      // print('getServices');
+      // print(data);
 
       // Set headers if needed
       dio.options.headers['Content-Type'] = 'application/json';
 
       Response response = await post('/employer/getservice', data);
-      print(response);
+      // print(response);
       return HttpResponse(
           data: response.data, statusCode: response.statusCode ?? 500);
     } on DioException catch (e) {

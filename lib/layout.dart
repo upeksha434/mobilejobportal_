@@ -26,7 +26,7 @@ class _LayoutState extends State<Layout> {
       final fetchedServices = await fetchServices.fetchServices(_searchController.text, _selectedLocation);
       setState(() {
         _services = fetchedServices;
-        print('Fetched services: $_services');
+
       });
     } catch (e) {
       print('Error fetching services: $e');
@@ -61,52 +61,104 @@ class _LayoutState extends State<Layout> {
                   : _services.isEmpty
                   ? Center(child: Text('No service provider to display.'))
                   : ListView.builder(
+                padding: EdgeInsets.all(8.0),
                 itemCount: _services.length,
                 itemBuilder: (context, index) {
                   var service = _services[index];
-                  var serviceName = service['fname'] ?? 'No name';
-                  var serviceRate = service['hourlyRate']?. toString() ?? 'No rate';
+                  var serviceName = service['fname'] + ' ' + service['lname'] ?? 'No name';
+                  var serviceRate = service['hourlyRate']?.toString() ?? 'No rate';
                   var serviceDescription = service['profileDescription'] ?? 'No description available';
+                  var averageRating = service['averageRating']?.toString();
                   var imageUrl = service['profilePic'] ?? 'https://myjopportal-sem6.s3.eu-north-1.amazonaws.com/3da39-no-user-image-icon-27.webp'; // Default image
 
-                  return Card(
-                    child: ListTile(
-                      leading: Image.network(
-                        imageUrl,
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Image.network(
-                            'https://myjopportal-sem6.s3.eu-north-1.amazonaws.com/3da39-no-user-image-icon-27.webp',
-                            width: 50,
-                            height: 50,
-                            fit: BoxFit.cover,
-                          );
-                        },
-                      ),
-                      title: Text(serviceName),
-                      subtitle: Text('$serviceRate rs/hour'),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ServiceDetailPage(
-                              serviceName: serviceName,
-                              serviceDescription: serviceDescription,
-                              serviceRate: serviceRate,
-                              imageUrl: imageUrl,
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Card(
+                      margin: EdgeInsets.zero, // Remove margin around the card
+                      child: Container(
+                        height: 150, // Adjust this value to increase the height of each card
+                        padding: EdgeInsets.all(8), // Adjust padding inside the container
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 180, // Adjust this value to increase the width of the image
+                              height: 150, // Adjust this value to increase the height of the image
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8.0),
+                                image: DecorationImage(
+                                  image: NetworkImage(imageUrl),
+                                  fit: BoxFit.cover,
+                                  onError: (error, stackTrace) {
+                                    setState(() {
+                                      imageUrl = 'https://myjopportal-sem6.s3.eu-north-1.amazonaws.com/3da39-no-user-image-icon-27.webp';
+                                    });
+                                  },
+                                ),
+                              ),
                             ),
-                          ),
-                        );
-                      },
+                            SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Text(serviceName, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                  SizedBox(height: 10),
+                                  Text('$serviceRate \$/hour',),
+                                  SizedBox(height: 10),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                                        width: 70,
+                                        height : 45,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(10),
+                                          border: Border.all(color: Colors.grey),
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              '$averageRating',
+                                              style: TextStyle(fontSize: 16),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(width: 20),
+                                      Container(
+                                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+                                        width: 70,
+                                        height : 45,
+                                        decoration: BoxDecoration(
+                                          color: Color(0xFF0BCE83),
+                                          borderRadius: BorderRadius.circular(10),
+                                          border: Border.all(color: Colors.transparent),
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            Icon(
+                                              Icons.chat_bubble_outline_sharp,
+                                              color: Colors.white,
+                                              size: 24.0,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   );
                 },
               ),
-            )
-
-
+            ),
           ],
         ),
       ),
@@ -138,73 +190,75 @@ class _LayoutState extends State<Layout> {
 
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: 'Search for a service',
-              prefixIcon: Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0),
+      padding: const EdgeInsets.all(5.0),
+
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search for a service',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(40.0),
+                ),
+                fillColor: Colors.white,
+                filled: true,
               ),
-              fillColor: Colors.white,
-              filled: true,
             ),
-          ),
-          SizedBox(height: 10),
-          DropdownButtonFormField<String>(
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0),
+            SizedBox(height: 10),
+            DropdownButtonFormField<String>(
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                prefixIcon: Icon(Icons.location_on),
+                fillColor: Colors.white,
+                filled: true,
               ),
-              prefixIcon: Icon(Icons.location_on),
-              fillColor: Colors.white,
-              filled: true,
+              hint: Text('Select location'),
+              items: <String>[
+                'Colombo',
+                'Kandy',
+                'Galle',
+                'Jaffna',
+                'Negombo',
+                'Anuradhapura',
+                'Trincomalee',
+                'Batticaloa',
+                'Matara',
+                'Nuwara Eliya',
+                'Ratnapura',
+                'Badulla',
+                'Kurunegala',
+                'Hambantota',
+                'Vavuniya',
+                'Polonnaruwa',
+                'Puttalam',
+                'Chilaw',
+                'Kalutara',
+                'Kegalle'
+              ].map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedLocation = newValue ?? '';
+                });
+              },
             ),
-            hint: Text('Select location'),
-            items: <String>[
-              'Colombo',
-              'Kandy',
-              'Galle',
-              'Jaffna',
-              'Negombo',
-              'Anuradhapura',
-              'Trincomalee',
-              'Batticaloa',
-              'Matara',
-              'Nuwara Eliya',
-              'Ratnapura',
-              'Badulla',
-              'Kurunegala',
-              'Hambantota',
-              'Vavuniya',
-              'Polonnaruwa',
-              'Puttalam',
-              'Chilaw',
-              'Kalutara',
-              'Kegalle'
-            ].map((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
-              );
-            }).toList(),
-            onChanged: (String? newValue) {
-              setState(() {
-                _selectedLocation = newValue ?? '';
-              });
-            },
-          ),
-          SizedBox(height: 10),
-          ElevatedButton(
-            onPressed: _performSearch,
-            child: Text('Search'),
-          ),
-        ],
+            SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: _performSearch,
+              child: Text('Search'),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
-

@@ -6,15 +6,14 @@ class FetchServices {
   FetchServices(this.httpClient);
 
   Future<List<dynamic>> fetchServices(String service, String location) async {
-    print('Fetching services...');
-    print('Service: $service');
-    print('Location: $location');
+
     final response = await HttpClient.getServices({
         'service': service,
         'location': location,
       },);
 
     if (response.statusCode == 201) {
+
       return response.data as List<dynamic>;
     } else {
       throw Exception('Failed to load services');
