@@ -19,10 +19,6 @@ class ServiceDetailPage extends StatelessWidget {
     final imageHeight = screenHeight / 2.5; // Set the height of the background image to half the screen height
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(serviceName),
-        backgroundColor: Color(0xFFD9D2E2),
-      ),
       body: Stack(
         children: [
           // Background Image
@@ -82,6 +78,17 @@ class ServiceDetailPage extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
+          ),
+          // Custom Back Button
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 20, // Adjust the position to your preference
+            left: 10,
+            child: IconButton(
+              icon: Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+              onPressed: () {
+                Navigator.pop(context);
+              },
             ),
           ),
         ],

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mobilejobportal/layout.dart';
 import 'package:mobilejobportal/utils/http_client.dart';
 import 'package:mobilejobportal/views/login.dart';
@@ -38,7 +39,10 @@ class JobPortal extends StatelessWidget {
       theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
           useMaterial3: true,
-          fontFamily: 'zen kaku gothic antique',
+          textTheme: GoogleFonts.aleoTextTheme(
+            Theme.of(context).textTheme.copyWith(
+              ),
+          ),
           inputDecorationTheme: const InputDecorationTheme(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(8)),

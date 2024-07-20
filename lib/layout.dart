@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mobilejobportal/utils/http_client.dart';
 import 'package:mobilejobportal/controllers/fetch_services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mobilejobportal/views/service_detail_page.dart';
+
 
 class Layout extends StatefulWidget {
   @override
@@ -47,14 +49,18 @@ class _LayoutState extends State<Layout> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Odd Job Portal'),
-        backgroundColor: Colors.lightBlueAccent,
+        // title: Text('Odd Job Portal'),
+
+        toolbarHeight: 0,
       ),
       body: Container(
+
         color: Color(0xFFF6F5F5),
         child: Column(
           children: [
             _buildSearchBar(),
+
+
             Expanded(
               child: _isLoading
                   ? Center(child: CircularProgressIndicator())
@@ -73,17 +79,34 @@ class _LayoutState extends State<Layout> {
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child:GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ServiceDetailPage(
+                              serviceName: serviceName,
+                              serviceDescription: serviceDescription,
+                              serviceRate: serviceRate,
+                              imageUrl: imageUrl,
+                            ),
+                          ),
+                        );
+                      },
                     child: Card(
-                      margin: EdgeInsets.zero, // Remove margin around the card
+                      margin: EdgeInsets.zero,
+                      elevation: 2.0, // Add this line to set the elevation (shadow) of the card
+                      shadowColor: Colors.grey,
                       child: Container(
                         height: 150, // Adjust this value to increase the height of each card
-                        padding: EdgeInsets.all(8), // Adjust padding inside the container
+                        padding: EdgeInsets.all(8),
                         child: Row(
                           children: [
                             Container(
                               width: 170, // Adjust this value to increase the width of the image
                               height: 150, // Adjust this value to increase the height of the image
                               decoration: BoxDecoration(
+
                                 borderRadius: BorderRadius.circular(8.0),
                                 image: DecorationImage(
                                   image: NetworkImage(imageUrl),
@@ -152,8 +175,10 @@ class _LayoutState extends State<Layout> {
                               ),
                             ),
                           ],
+
                         ),
                       ),
+                    ),
                     ),
                   );
                 },
@@ -191,14 +216,26 @@ class _LayoutState extends State<Layout> {
   Widget _buildSearchBar() {
     return Padding(
       padding: EdgeInsetsDirectional.only(top: 0.0, start: 10.0, end: 0.0),
-      
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+
+      child: Stack(
+
+
         children: [
-          Align(
-            alignment: Alignment.centerRight, // Aligns the container to the right
+          Positioned(
+              child: Container(
+                padding: EdgeInsetsDirectional.only(top: 50), // Adjust top padding
+            child: Text(
+              'Services',
+              style: GoogleFonts.aleo(fontSize: 30, fontWeight: FontWeight.bold),
+            ),
+          )),
+          // Vegetable image
+          Positioned(
+
+            right: 0,
+            top:0,
             child: Container(
-              height: 150,
+              height: 140,
               width: 150,
               decoration: BoxDecoration(
                 image: DecorationImage(
@@ -208,105 +245,120 @@ class _LayoutState extends State<Layout> {
               ),
             ),
           ),
-
           Container(
-            height: 40, // Adjust the height of the search bar
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                contentPadding: EdgeInsets.symmetric(vertical: 10.0),
-                hintText: 'Search for a service',
-                hintStyle: TextStyle(fontSize: 16,color: Color(0xFF9586A8)),
-                prefixIcon: Icon(Icons.search, color: Colors.black),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(40.0),
-                  borderSide: BorderSide(color: Color(0xFFD9D0E3),width: 40),
-                ),
-                fillColor: Colors.white,
-                filled: true,
-              ),
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              //borderRadius: BorderRadius.circular(5.0),
+             //border:BorderDirectional(bottom: BorderSide(color: Colors.grey, width: 2.0,shadow)),
+
             ),
-          ),
-          SizedBox(height: 10),
-          Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
 
-            //height of the row
             children: [
-              Expanded(
-                flex: 2,
-
-                child: Container(
-                  height: 40, // Adjust this value to change the height of the dropdown button container
-                  child: DropdownButtonFormField<String>(
-                    decoration: InputDecoration(
-                        contentPadding: EdgeInsets.symmetric(vertical: 10.0),
-                        border: OutlineInputBorder(
-                        borderSide: BorderSide(color: Color(0xFFD9D0E3),width: 2.5),
-                        borderRadius: BorderRadius.circular(40.0),
-
-                      ),
-                      prefixIcon: Icon(Icons.location_on,color: Colors.black,),
-
-                      fillColor: Colors.white,
-                      filled: true,
-                    ),
-                    hint: Text('Select location', style: TextStyle(fontSize: 16, color: Color(0xFF9586A8)),),
-                    items: <String>[
-                      'Colombo',
-                      'Kandy',
-                      'Galle',
-                      'Jaffna',
-                      'Negombo',
-                      'Anuradhapura',
-                      'Trincomalee',
-                      'Batticaloa',
-                      'Matara',
-                      'Nuwara Eliya',
-                      'Ratnapura',
-                      'Badulla',
-                      'Kurunegala',
-                      'Hambantota',
-                      'Vavuniya',
-                      'Polonnaruwa',
-                      'Puttalam',
-                      'Chilaw',
-                      'Kalutara',
-                      'Kegalle'
-                    ].map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedLocation = newValue ?? '';
-                      });
-                    },
-                  ),
-                ),
-              ),
-
-              SizedBox(width: 10),
-              Expanded(
-                flex: 1,  // Adjust this value to change the width of the search button
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFE2CBFF),
-
-                    shape: RoundedRectangleBorder(
+              // Search bar
+              Container(
+                padding: EdgeInsetsDirectional.only(start: 0.0, end: 10.0, top: 120), // Adjust top padding
+                height: 160, // Adjust height of the search bar container
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+                    hintText: 'Search for a service',
+                    hintStyle: TextStyle(fontSize: 16, color: Color(0xFF9586A8)),
+                    prefixIcon: Icon(Icons.search, color: Colors.black),
+                    border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(40.0),
+                      borderSide: BorderSide(color: Color(0xFFD9D0E3), width: 2.5),
                     ),
+                    fillColor: Colors.white,
+                    filled: true,
                   ),
-                  onPressed: _performSearch,
-                  child: Text('Search', style: TextStyle(fontSize: 16, color: Color(0xFF6C0EE4))),
                 ),
               ),
+              SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Container(
+                      height: 40, // Adjust this value to match dropdown button height
+                      child: DropdownButtonFormField<String>(
+                        decoration: InputDecoration(
+                          contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(color: Color(0xFFD9D0E3), width: 2.5),
+                            borderRadius: BorderRadius.circular(40.0),
+                          ),
+                          prefixIcon: Icon(Icons.location_on, color: Colors.black),
+                          fillColor: Colors.white,
+                          filled: true,
+                        ),
+                        hint: Text('Select location', style: TextStyle(fontSize: 16, color: Color(0xFF9586A8))),
+                        items: <String>[
+                          'Colombo',
+                          'Kandy',
+                          'Galle',
+                          'Jaffna',
+                          'Negombo',
+                          'Anuradhapura',
+                          'Trincomalee',
+                          'Batticaloa',
+                          'Matara',
+                          'Nuwara Eliya',
+                          'Ratnapura',
+                          'Badulla',
+                          'Kurunegala',
+                          'Hambantota',
+                          'Vavuniya',
+                          'Polonnaruwa',
+                          'Puttalam',
+                          'Chilaw',
+                          'Kalutara',
+                          'Kegalle'
+                        ].map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _selectedLocation = newValue ?? '';
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  Expanded(
+                    flex: 1, // Adjust this value to change the width of the search button
+                    child: Container(
+                      padding: EdgeInsetsDirectional.only(start: 0.0, end: 10.0),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFFE2CBFF),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(40.0),
+                          ),
+                        ),
+                        onPressed: _performSearch,
+                        child: Text('Search', style: TextStyle(fontSize: 16, color: Color(0xFF6C0EE4))),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox.fromSize(
+                size: Size.fromHeight(10),
+              )
             ],
           ),
-
+          ),
         ],
       ),
     );
   }
+
+
 }
