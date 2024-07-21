@@ -47,6 +47,7 @@ class HttpClient {
   }
 
   static Future<HttpResponse>sendMessages(Map data) async {
+    print(data);
     try {
       dio.options.headers['Content-Type'] = 'application/json';
 

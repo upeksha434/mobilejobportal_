@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:mobilejobportal/controllers/chat_controller.dart';
 import 'package:mobilejobportal/utils/http_client.dart';
 
+import '../controllers/auth_controller.dart';
+
 class ChatPage extends StatefulWidget {
   final int employerId;
   final int employeeId;
@@ -15,14 +17,38 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
+  int loggedInUserId =AuthController.userId;
   final TextEditingController _messageController = TextEditingController();
   final ChatController _chatController = ChatController(HttpClient());
   List<Map<String, dynamic>> _messages = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    // Fetch initial chat history here if needed
+    _fetchMessages();
+  }
+
+  void _fetchMessages() async {
+    try {
+      final messages = await _chatController.getMessages(widget.employerId, widget.employeeId);
+      setState(() {
+        _messages = messages.map((message) {
+          return {
+            'sender': message['senderId'],
+            'message': message['message'],
+            'timestamp': message['updatedAt'],
+
+          };
+        }).toList();
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Failed to load messages: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   void _sendMessage() async {
@@ -34,7 +60,7 @@ class _ChatPageState extends State<ChatPage> {
         // Add the message to the local list for display
         setState(() {
           _messages.add({
-            'sender': 'me', // or loggedInUserId
+            'sender': loggedInUserId, // or loggedInUserId
             'message': _messageController.text,
             'timestamp': DateTime.now(),
           });
@@ -56,7 +82,9 @@ class _ChatPageState extends State<ChatPage> {
         title: Text('Chat'),
         backgroundColor: Color(0xFFD9D2E2),
       ),
-      body: Column(
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : Column(
         children: [
           Expanded(
             child: ListView.builder(
@@ -65,14 +93,14 @@ class _ChatPageState extends State<ChatPage> {
               itemBuilder: (context, index) {
                 var message = _messages[index];
                 return Align(
-                  alignment: message['sender'] == 'me'
+                  alignment: message['sender'] == loggedInUserId
                       ? Alignment.centerRight
                       : Alignment.centerLeft,
                   child: Container(
                     margin: EdgeInsets.symmetric(vertical: 5.0),
                     padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
                     decoration: BoxDecoration(
-                      color: message['sender'] == 'me'
+                      color: message['sender'] == loggedInUserId
                           ? Colors.blueAccent
                           : Colors.grey.shade300,
                       borderRadius: BorderRadius.circular(10.0),

@@ -1,3 +1,4 @@
+import 'package:mobilejobportal/controllers/auth_controller.dart';
 import 'package:mobilejobportal/utils/http_client.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -6,21 +7,16 @@ class ChatController {
 
   ChatController(this.httpClient);
 
-  Future<int> _loadUserId() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt('userId') ?? 0;
-  }
 
   Future<void> sendMessages(int employerId, int employeeId, String message) async {
     print(employerId);
     print(employeeId);
     print(message);
-    final userId = await _loadUserId();
     final response = await HttpClient.sendMessages({
       'employerId': employerId,
       'employeeId': employeeId,
       'message': message,
-      'sender': userId,
+      'sender': AuthController.userId,
     });
     if (response.statusCode != 201) {
       throw Exception('Failed to send message');
