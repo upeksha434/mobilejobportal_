@@ -31,13 +31,43 @@ class HttpClient {
   }
   static Future<HttpResponse> getServices(Map data) async {
     try {
-      // print('getServices');
-      // print(data);
-
-      // Set headers if needed
       dio.options.headers['Content-Type'] = 'application/json';
 
       Response response = await post('/employer/getservice', data);
+      // print(response);
+      return HttpResponse(
+          data: response.data, statusCode: response.statusCode ?? 500);
+    } on DioException catch (e) {
+      print(e);
+      print("error");
+      return HttpResponse(
+          data: e.response?.data,
+          statusCode: e.response?.statusCode ?? 500);
+    }
+  }
+
+  static Future<HttpResponse>sendMessages(Map data) async {
+    try {
+      dio.options.headers['Content-Type'] = 'application/json';
+
+      Response response = await post('/chats/sendMessage', data);
+      // print(response);
+      return HttpResponse(
+          data: response.data, statusCode: response.statusCode ?? 500);
+    } on DioException catch (e) {
+      print(e);
+      print("error");
+      return HttpResponse(
+          data: e.response?.data,
+          statusCode: e.response?.statusCode ?? 500);
+    }
+  }
+
+  static Future<HttpResponse>getMessages(Map data) async {
+    try {
+      dio.options.headers['Content-Type'] = 'application/json';
+
+      Response response = await post('/chats/getMessages', data);
       // print(response);
       return HttpResponse(
           data: response.data, statusCode: response.statusCode ?? 500);

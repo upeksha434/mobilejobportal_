@@ -4,15 +4,24 @@ import 'package:mobilejobportal/utils/http_client.dart';
 import 'package:mobilejobportal/controllers/fetch_services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobilejobportal/views/service_detail_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mobilejobportal/views/chat.dart';
 
+import 'controllers/auth_controller.dart';
 
 class Layout extends StatefulWidget {
   @override
   _LayoutState createState() => _LayoutState();
 }
 
+
 class _LayoutState extends State<Layout> {
+
+  int loggedInUserId =AuthController.userId;
+
+
   final TextEditingController _searchController = TextEditingController();
+
   String _selectedLocation = '';
   List<dynamic> _services = [];
   bool _isLoading = false;
@@ -150,7 +159,24 @@ class _LayoutState extends State<Layout> {
                                         ),
                                       ),
                                       SizedBox(width: 10),
-                                      Container(
+                                      GestureDetector(
+                                        onTap:(){
+                                          print('Logged in user ID: $loggedInUserId');
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder:(context)=> ChatPage(
+
+                                                employerId: loggedInUserId,
+                                                employeeId: service['id'],
+
+
+                                              )
+                                            )
+                                          );
+                                        },
+
+                                      child: Container(
                                         padding: EdgeInsets.symmetric(horizontal: 10, vertical: 9),
                                         width: 80,
                                         height : 45,
@@ -168,6 +194,7 @@ class _LayoutState extends State<Layout> {
                                             ),
                                           ],
                                         ),
+                                      ),
                                       ),
                                     ],
                                   ),

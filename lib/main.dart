@@ -57,8 +57,8 @@ class JobPortal extends StatelessWidget {
               ),
             ),
           )),
-      home: //LoginPage(),
-      Layout(),
+      home: LoginPage(),
+      //Layout(),
       getPages: [
         GetPage(name: '/views', page: () => Layout()),
       ],

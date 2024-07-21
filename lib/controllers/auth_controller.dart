@@ -13,12 +13,14 @@ class AuthController {
   static TextEditingController emailController = TextEditingController();
   static TextEditingController passwordController = TextEditingController();
 
+
   static RxBool isPasswordVisible = true.obs;
   static RxBool loading = false.obs;
 
   static String token = '';
 
   static late AuthUser user;
+  static int userId = 0;
 
   static signIn() async {
     loading.value = true;
@@ -32,6 +34,12 @@ class AuthController {
       token = res.data['accessToken'];
 
       user = AuthUser.fromJSON(res.data['user']);
+
+      // Store user ID in SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('userId', user.id);
+      userId = user.id;
+
 
       Get.offAll(() => Layout());
     }
