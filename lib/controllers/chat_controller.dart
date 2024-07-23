@@ -35,4 +35,17 @@ class ChatController {
       throw Exception('Failed to load services');
     }
   }
+
+  Future<List>getEmployeeChats() async{
+    final response = await HttpClient.getEmployeeChatcards({
+      'employeeId': AuthController.userId,
+    });
+    if (response.statusCode == 201) {
+      print(response.data);
+
+      return response.data as List<dynamic>;
+    } else {
+      throw Exception('Failed to load services');
+    }
+  }
 }

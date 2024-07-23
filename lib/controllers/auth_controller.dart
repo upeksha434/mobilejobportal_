@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mobilejobportal/views/employerChatHistoryView.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mobilejobportal/utils/http_client.dart';
 import '../layout.dart';
@@ -40,8 +41,13 @@ class AuthController {
       await prefs.setInt('userId', user.id);
       userId = user.id;
 
+      if(user.roleId==1)
+        Get.offAll(() => Layout());
+      else
+        Get.offAll(() => EmployerChatHistoryView());
 
-      Get.offAll(() => Layout());
+
+
     }
     else {
       Get.snackbar('Error', 'Invalid Credentials');
