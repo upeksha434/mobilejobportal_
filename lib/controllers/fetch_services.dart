@@ -19,4 +19,20 @@ class FetchServices {
       throw Exception('Failed to load services');
     }
   }
+
+  Future<List<dynamic>> getEmployeeRating(int employeeId) async {
+
+    final response = await HttpClient.getEmployeeRating(employeeId.toString());
+    final ratings = response.data['ratings'] as List<dynamic>;
+
+    return ratings ;
+    if (response.statusCode == 201) {
+      print(response.data);
+      print('ser');
+      return response.data as List<dynamic>;
+    } else {
+      throw Exception('Failed to load services');
+    }
+  }
+
 }

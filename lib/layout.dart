@@ -81,6 +81,7 @@ class _LayoutState extends State<Layout> {
                 itemCount: _services.length,
                 itemBuilder: (context, index) {
                   var service = _services[index];
+                  var employeeId = service['id'];
                   var serviceName = service['fname'] + ' ' + service['lname'] ?? 'No name';
                   var serviceRate = service['hourlyRate']?.toString() ?? 'No rate';
                   var serviceDescription = service['profileDescription'] ?? 'No description available';
@@ -99,6 +100,8 @@ class _LayoutState extends State<Layout> {
                               serviceDescription: serviceDescription,
                               serviceRate: serviceRate,
                               imageUrl: imageUrl,
+                              averageRating: averageRating,
+                              employeeId: employeeId,
                             ),
                           ),
                         );
