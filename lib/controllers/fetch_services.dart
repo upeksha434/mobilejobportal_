@@ -24,8 +24,9 @@ class FetchServices {
 
     final response = await HttpClient.getEmployeeRating(employeeId.toString());
     final ratings = response.data['ratings'] as List<dynamic>;
+    final averageRating = response.data['averageRating'];
 
-    return ratings ;
+    return [ratings, averageRating];
     if (response.statusCode == 201) {
       print(response.data);
       print('ser');

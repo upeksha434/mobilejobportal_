@@ -52,6 +52,21 @@ class UserController{
     return false;
   }
 
+  static postEmployeeRating(int employerId, int employeeId, double rating, String review) async {
+    final response = await HttpClient.postEmployeeRating({
+      'employerId': employerId,
+      'employeeId': employeeId,
+      'rating': rating,
+      'review': review,
+    });
+
+    if (response.statusCode == 201) {
+      Get.snackbar('Success', 'Rating submitted successfully');
+    } else {
+      Get.snackbar('Error', 'Failed to submit rating');
+    }
+  }
+
   static logout() async {
     // Perform any necessary cleanup or API calls for logout. backend
 

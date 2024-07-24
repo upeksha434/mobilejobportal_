@@ -113,6 +113,22 @@ class HttpClient {
           statusCode: e.response?.statusCode ?? 500);
     }
   }
+  static Future<HttpResponse> postEmployeeRating(Map data) async {
+    try {
+      dio.options.headers['Content-Type'] = 'application/json';
+
+      Response response = await post('/employee/postReview', data);
+      // print(response);
+      return HttpResponse(
+          data: response.data, statusCode: response.statusCode ?? 500);
+    } on DioException catch (e) {
+      print(e);
+      print("error");
+      return HttpResponse(
+          data: e.response?.data,
+          statusCode: e.response?.statusCode ?? 500);
+    }
+  }
 
 
   static testRoute(Map data) async {

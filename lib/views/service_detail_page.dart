@@ -1,9 +1,11 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:get/get.dart';
+import 'package:mobilejobportal/controllers/auth_controller.dart';
 import 'package:mobilejobportal/utils/http_client.dart';
-
 import '../controllers/fetch_services.dart';
+import '../controllers/user_controller.dart';
 
 class ServiceDetailPage extends StatelessWidget {
   final String serviceName;
@@ -12,7 +14,6 @@ class ServiceDetailPage extends StatelessWidget {
   final String imageUrl;
   final String? averageRating;
   final int employeeId;
-
 
   ServiceDetailPage({
     required this.serviceName,
@@ -24,10 +25,7 @@ class ServiceDetailPage extends StatelessWidget {
   });
 
   final FetchServices fetchServices = FetchServices(HttpClient() as HttpClient);
-  List<dynamic> _reviews = [];
-
-
-
+  int loggedInUserId = AuthController.userId;
 
   @override
   Widget build(BuildContext context) {
@@ -146,20 +144,20 @@ class ServiceDetailPage extends StatelessWidget {
     );
   }
 
-
   Future<void> _showBookingDialog(BuildContext context) async {
-    final reviews = await fetchServices.getEmployeeRating(employeeId);
-    print('reviews');
+    final reviews_average = await fetchServices.getEmployeeRating(employeeId);
+    final reviews_ = reviews_average[0];
+    final averageRating = double.parse(reviews_average[1].toString()).toStringAsFixed(2);
 
-
-
-
-
-    print(reviews);
-    print('rev');
-
-
-
+    print(reviews_);
+    final reviewExistsForUser = reviews_.any((review) => review['employerId'] == loggedInUserId);
+    final postedReview = reviews_.firstWhere((review) => review['employerId'] == loggedInUserId, orElse: () => {});
+    final _5star = reviews_.where((review) => review['rating'] == 5).length / reviews_.length;
+    final _4star = reviews_.where((review) => review['rating'] == 4).length / reviews_.length;
+    final _3star = reviews_.where((review) => review['rating'] == 3).length / reviews_.length;
+    final _2star = reviews_.where((review) => review['rating'] == 2).length / reviews_.length;
+    final _1star = reviews_.where((review) => review['rating'] == 1).length / reviews_.length;
+    final reviews = reviews_.where((review) => review['employerId'] != loggedInUserId).toList();
 
     showDialog(
       context: context,
@@ -169,44 +167,251 @@ class ServiceDetailPage extends StatelessWidget {
             borderRadius: BorderRadius.circular(10.0),
           ),
           child: Container(
-            padding: EdgeInsets.all(0.0),
-            width: double.infinity,
-            height:double.infinity,
+            padding: EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Colors.white, Colors.white, Colors.white],
+                stops: [0.0, 0.6, 0.9],
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+              ),
+              borderRadius: BorderRadius.circular(10.0),
+            ),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Reviews', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),),
-                Container(
-                  child: Text('Post a Review', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
-
-                  decoration: BoxDecoration(
-
-                    border: Border.all(color: Colors.grey[300]!),
-                    borderRadius: BorderRadius.circular(10.0),
-                    color: Colors.grey[200],
+                Text('Reviews', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black)),
+                const SizedBox(
+                  height: 16,
+                  width: double.infinity,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      border: Border(bottom: BorderSide(color: Colors.black12, width: 2.0)),
+                    ),
                   ),
-
                 ),
-
-                Expanded(child: ListView.builder(
-                  itemCount: reviews.length, // reviews['reviews'
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text(reviews[index]['employerName'], style: TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text(reviews[index]['review']),
-                      trailing: Text(reviews[index]['rating'].toString(),
-                        style: TextStyle(fontWeight: FontWeight.bold,fontSize: 15),),
-                    );
+                SizedBox(height: 16),
+                Text('$averageRating', style: TextStyle(fontSize: 25, color: Colors.black, fontWeight: FontWeight.bold)),
+                RatingBar.builder(
+                  initialRating: averageRating == 'NaN' ? 0 : double.parse(averageRating),
+                  minRating: 1,
+                  direction: Axis.horizontal,
+                  ignoreGestures: true,
+                  allowHalfRating: true,
+                  itemCount: 5,
+                  itemSize: 24,
+                  itemPadding: EdgeInsets.symmetric(horizontal: 2.0),
+                  itemBuilder: (context, _) => const Icon(
+                    Icons.star,
+                    color: Colors.amber,
+                  ),
+                  onRatingUpdate: (rating) {
+                    print(rating);
                   },
-                ),),
-
-
-
+                ),
+                SizedBox(height: 16),
+                Text('Based on ${reviews_.length} reviews', style: TextStyle(fontSize: 16, color: Colors.black)),
+                SizedBox(height: 16),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        _buildRatingBars(_5star, _4star, _3star, _2star, _1star),
+                        if (reviewExistsForUser)
+                          Container(
+                            padding: EdgeInsets.all(8.0),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.rectangle,
+                              color: Colors.white.withOpacity(0.4),
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.all(8.0),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.rectangle,
+                                    color: Colors.white.withOpacity(0.4),
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    border: Border.all(color: Colors.black12, width: 2.0),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Text('You already Reviewed $serviceName', style: TextStyle(fontSize: 16)),
+                                      ListTile(
+                                        contentPadding: EdgeInsets.all(0),
+                                        leading: CircleAvatar(
+                                          radius: 22,
+                                          backgroundImage: NetworkImage(postedReview['profilePic']),
+                                        ),
+                                        title: Text(postedReview['employerName'], style: TextStyle(fontWeight: FontWeight.bold)),
+                                        subtitle: Text(postedReview['review'], style: TextStyle(fontSize: 15, color: Colors.black)),
+                                        trailing: Text('⭐ ${postedReview['rating']}', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 15)),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (!reviewExistsForUser)
+                          ElevatedButton(
+                            onPressed: () {
+                              _showReviewForm(context);
+                            },
+                            child: Text('Post a Review'),
+                          ),
+                        SizedBox(height: 16),
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: reviews.length,
+                          itemBuilder: (context, index) {
+                            return Container(
+                              margin: EdgeInsets.symmetric(vertical: 8.0),
+                              padding: EdgeInsets.all(8.0),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.rectangle,
+                                color: Colors.white.withOpacity(0.4),
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                              child: ListTile(
+                                contentPadding: EdgeInsets.all(0),
+                                leading: CircleAvatar(
+                                  radius: 22,
+                                  backgroundImage: NetworkImage(reviews[index]['profilePic']),
+                                ),
+                                title: Text(
+                                  reviews[index]['employerName'],
+                                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                                ),
+                                subtitle: Text(
+                                  reviews[index]['review'],
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                                trailing: Text('⭐ ${reviews[index]['rating']}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black)),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  void _showReviewForm(BuildContext context) {
+    final _formKey = GlobalKey<FormState>();
+    final _ratingController = TextEditingController();
+    final _reviewController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Post a Review', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  TextFormField(
+                    controller: _ratingController,
+                    decoration: InputDecoration(labelText: 'Rating'),
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a rating';
+                      }
+                      final rating = double.tryParse(value);
+                      if (rating == null || rating < 1 || rating > 5) {
+                        return 'Please enter a valid rating (1-5)';
+                      }
+                      return null;
+                    },
+                  ),
+                  TextFormField(
+                    controller: _reviewController,
+                    decoration: InputDecoration(labelText: 'Review'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a review';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        _postReview(context, double.parse(_ratingController.text), _reviewController.text);
+                      }
+                    },
+                    child: Text('Submit'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _postReview(BuildContext context, double rating, String review) async {
+    try {
+      await UserController.postEmployeeRating(loggedInUserId, employeeId, rating, review);
+      Navigator.pop(context); // Close the review form
+      Navigator.pop(context); // Close the booking dialog
+      _showBookingDialog(context); // Reopen the booking dialog to show updated reviews
+    } catch (error) {
+      print('Error posting review: $error');
+    }
+  }
+
+  Widget _buildRatingBars(double _5star, double _4star, double _3star, double _2star, double _1star) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildRatingBar('5', Colors.green, _5star),
+        _buildRatingBar('4', Colors.lightGreen, _4star),
+        _buildRatingBar('3', Colors.yellow, _3star),
+        _buildRatingBar('2', Colors.orange, _2star),
+        _buildRatingBar('1', Colors.red, _1star),
+      ],
+    );
+  }
+
+  Widget _buildRatingBar(String label, Color color, double percentage) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text('${label} ⭐ - ${(percentage * 100).toStringAsFixed(1)}%'),
+          ),
+          Expanded(
+            child: LinearProgressIndicator(
+              value: percentage,
+              backgroundColor: Colors.grey[300],
+              valueColor: AlwaysStoppedAnimation<Color>(color),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
