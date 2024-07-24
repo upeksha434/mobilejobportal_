@@ -66,6 +66,25 @@ class UserController{
       Get.snackbar('Error', 'Failed to submit rating');
     }
   }
+  static updateEmployeeRating(int employerId, int employeeId, double rating, String review, int id) async {
+    print(employerId);
+    print(employeeId);
+    print(rating);
+    print(review);
+    print(id);
+    final response = await HttpClient.updateEmployeeRating({
+      'employerId': employerId,
+      'employeeId': employeeId,
+      'rating': rating,
+      'review': review,
+    },id);
+
+    if (response.statusCode == 201) {
+      Get.snackbar('Success', 'Rating updated successfully');
+    } else {
+      Get.snackbar('Error', 'Failed to update rating');
+    }
+  }
 
   static logout() async {
     // Perform any necessary cleanup or API calls for logout. backend

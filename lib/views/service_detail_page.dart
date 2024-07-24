@@ -237,8 +237,18 @@ class ServiceDetailPage extends StatelessWidget {
                                     border: Border.all(color: Colors.black12, width: 2.0),
                                   ),
                                   child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text('You already Reviewed $serviceName', style: TextStyle(fontSize: 16)),
+                                      Text('Your Review', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black)),
+                                      const SizedBox(
+                                        height: 8,
+                                        width: double.infinity,
+                                        child: DecoratedBox(
+                                          decoration: BoxDecoration(
+                                            border: Border(bottom: BorderSide(color: Colors.black12, width: 2.0)),
+                                          ),
+                                        ),
+                                      ),
                                       ListTile(
                                         contentPadding: EdgeInsets.all(0),
                                         leading: CircleAvatar(
@@ -246,9 +256,44 @@ class ServiceDetailPage extends StatelessWidget {
                                           backgroundImage: NetworkImage(postedReview['profilePic']),
                                         ),
                                         title: Text(postedReview['employerName'], style: TextStyle(fontWeight: FontWeight.bold)),
-                                        subtitle: Text(postedReview['review'], style: TextStyle(fontSize: 15, color: Colors.black)),
-                                        trailing: Text('⭐ ${postedReview['rating']}', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 15)),
+                                        //subtitle: Text(postedReview['review'], style: TextStyle(fontSize: 15, color: Colors.black)),
+                                        subtitle: RatingBar.builder(
+                                          initialRating:postedReview['rating'].toDouble(),
+                                          minRating: 1,
+                                          direction: Axis.horizontal,
+                                          ignoreGestures: true,
+                                          allowHalfRating: false,
+                                          itemCount: 5,
+                                          itemSize: 16,
+                                          itemPadding: EdgeInsets.symmetric(horizontal: 2.0),
+                                          itemBuilder: (context, _) => const Icon(
+                                            Icons.star,
+                                            color: Colors.amber,
+                                          ),
+                                          onRatingUpdate: (rating) {
+                                            print(rating);
+                                          },
+                                        ),
+                                        //subtitle:Text('⭐ ${postedReview['rating']+1}', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 15)),
+
                                       ),
+                                      Text(postedReview['review'], style: TextStyle(fontSize: 15, color: Colors.black,),),
+                                      SizedBox(height: 8),
+                                      GestureDetector(
+                                        onTap: () {
+                                          _showReviewForm(context,postedReview['id']);
+                                        },
+                                        child: Container(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            'Edit your review',
+                                            style: TextStyle(color: Colors.blue),
+                                            textAlign: TextAlign.start,
+                                          ),
+                                        ),
+                                      )
+
+
                                     ],
                                   ),
                                 ),
@@ -258,9 +303,9 @@ class ServiceDetailPage extends StatelessWidget {
                         if (!reviewExistsForUser)
                           ElevatedButton(
                             onPressed: () {
-                              _showReviewForm(context);
+                              _showReviewForm(context,0);
                             },
-                            child: Text('Post a Review'),
+                            child: Text('Write Review'),
                           ),
                         SizedBox(height: 16),
                         ListView.builder(
@@ -276,7 +321,10 @@ class ServiceDetailPage extends StatelessWidget {
                                 color: Colors.white.withOpacity(0.4),
                                 borderRadius: BorderRadius.circular(10.0),
                               ),
-                              child: ListTile(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                              ListTile(
                                 contentPadding: EdgeInsets.all(0),
                                 leading: CircleAvatar(
                                   radius: 22,
@@ -286,12 +334,28 @@ class ServiceDetailPage extends StatelessWidget {
                                   reviews[index]['employerName'],
                                   style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
                                 ),
-                                subtitle: Text(
-                                  reviews[index]['review'],
-                                  style: TextStyle(color: Colors.black),
+                                subtitle: RatingBar.builder(
+                                  initialRating:reviews[index]['rating'].toDouble(),
+                                  minRating: 1,
+                                  direction: Axis.horizontal,
+                                  ignoreGestures: true,
+                                  allowHalfRating: false,
+                                  itemCount: 5,
+                                  itemSize: 16,
+                                  itemPadding: EdgeInsets.symmetric(horizontal: 2.0),
+                                  itemBuilder: (context, _) => const Icon(
+                                    Icons.star,
+                                    color: Colors.amber,
+                                  ),
+                                  onRatingUpdate: (rating) {
+                                    print(rating);
+                                  },
                                 ),
-                                trailing: Text('⭐ ${reviews[index]['rating']}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black)),
-                              ),
+                                ),
+                                    Text(reviews[index]['review'], style: TextStyle(fontSize: 15, color: Colors.black)),
+                                  ],),
+
+
                             );
                           },
                         ),
@@ -307,7 +371,7 @@ class ServiceDetailPage extends StatelessWidget {
     );
   }
 
-  void _showReviewForm(BuildContext context) {
+  void _showReviewForm(BuildContext context, int reviewId) {
     final _formKey = GlobalKey<FormState>();
     final _ratingController = TextEditingController();
     final _reviewController = TextEditingController();
@@ -326,22 +390,27 @@ class ServiceDetailPage extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('Post a Review', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                  TextFormField(
-                    controller: _ratingController,
-                    decoration: InputDecoration(labelText: 'Rating'),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a rating';
-                      }
-                      final rating = double.tryParse(value);
-                      if (rating == null || rating < 1 || rating > 5) {
-                        return 'Please enter a valid rating (1-5)';
-                      }
-                      return null;
+
+                  Text('Post a Review', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold,),textAlign: TextAlign.center,),
+                  SizedBox(height: 16),
+                  RatingBar.builder(
+                    initialRating:0.0,
+                    minRating: 1,
+                    direction: Axis.horizontal,
+                    ignoreGestures: false,
+                    allowHalfRating: false,
+                    itemCount: 5,
+                    itemSize: 24,
+                    itemPadding: EdgeInsets.symmetric(horizontal: 2.0),
+                    itemBuilder: (context, _) => const Icon(
+                      Icons.star,
+                      color: Colors.amber,
+                    ),
+                    onRatingUpdate: (rating) {
+                      _ratingController.text = rating.toString();
                     },
                   ),
+                  SizedBox(height: 16),
                   TextFormField(
                     controller: _reviewController,
                     decoration: InputDecoration(labelText: 'Review'),
@@ -356,7 +425,7 @@ class ServiceDetailPage extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        _postReview(context, double.parse(_ratingController.text), _reviewController.text);
+                        _postReview(context, double.parse(_ratingController.text), _reviewController.text, reviewId);
                       }
                     },
                     child: Text('Submit'),
@@ -370,9 +439,13 @@ class ServiceDetailPage extends StatelessWidget {
     );
   }
 
-  Future<void> _postReview(BuildContext context, double rating, String review) async {
+  Future<void> _postReview(BuildContext context, double rating, String review, int reviewId) async {
     try {
-      await UserController.postEmployeeRating(loggedInUserId, employeeId, rating, review);
+      if(reviewId != 0) {
+        await UserController.updateEmployeeRating(loggedInUserId, employeeId, rating, review, reviewId);
+      } else {
+        await UserController.postEmployeeRating(loggedInUserId, employeeId, rating, review);
+      }
       Navigator.pop(context); // Close the review form
       Navigator.pop(context); // Close the booking dialog
       _showBookingDialog(context); // Reopen the booking dialog to show updated reviews
