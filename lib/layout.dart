@@ -6,7 +6,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mobilejobportal/views/service_detail_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mobilejobportal/views/chat.dart';
-
 import 'bottomNavigation.dart';
 import 'controllers/auth_controller.dart';
 
@@ -156,7 +155,7 @@ class _LayoutState extends State<Layout> {
                                         child: Column(
                                           children: [
                                             Text(
-                                              '$averageRating',
+                                              '⭐ $averageRating',
                                               style: TextStyle(fontSize: 16),
                                             ),
                                           ],
@@ -192,7 +191,7 @@ class _LayoutState extends State<Layout> {
                                         child: Column(
                                           children: [
                                             Icon(
-                                              Icons.chat_bubble_outline_sharp,
+                                              Icons.question_answer,
                                               color: Colors.white,
                                               size: 24.0,
                                             ),

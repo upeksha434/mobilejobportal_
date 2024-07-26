@@ -4,6 +4,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
 import 'package:mobilejobportal/controllers/auth_controller.dart';
 import 'package:mobilejobportal/utils/http_client.dart';
+import 'package:mobilejobportal/views/chat.dart';
 import '../controllers/fetch_services.dart';
 import '../controllers/user_controller.dart';
 
@@ -109,14 +110,26 @@ class ServiceDetailPage extends StatelessWidget {
                                 onPressed: () {
                                   _showBookingDialog(context);
                                 },
-                                child: Text('Book Now'),
+                                child: Text('Review'),
                               ),
                             ),
                             SizedBox(width: 16),
                             Expanded(
                               child: ElevatedButton(
-                                onPressed: () {},
-                                child: Text('Another Button'),
+                                onPressed: () {
+                                  print('Logged in user ID: $loggedInUserId');
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+
+                                  ChatPage(
+                                    employerId: loggedInUserId,
+                                    employeeId: employeeId,
+                                  ),),
+                                  );
+                                },
+                                child: Text('Contact'),
                               ),
                             ),
                           ],
