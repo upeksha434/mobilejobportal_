@@ -217,10 +217,10 @@ class _LayoutState extends State<Layout> {
           ],
         ),
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(
-        pageController: pageController,
-        page: page,
-      ),
+      // bottomNavigationBar: CustomBottomNavigationBar(
+      //   pageController: pageController,
+      //   page: page,
+      // ),
     );
   }
 

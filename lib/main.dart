@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mobilejobportal/layout.dart';
 import 'package:mobilejobportal/utils/http_client.dart';
 import 'package:mobilejobportal/views/login.dart';
+import 'package:mobilejobportal/views/profile.dart';
 import 'controllers/auth_controller.dart';
 
 
@@ -61,8 +62,12 @@ class JobPortal extends StatelessWidget {
       //Layout(),
       getPages: [
         GetPage(name: '/views', page: () => Layout()),
+        GetPage(name: '/login', page: () => LoginPage()),
+        GetPage(name: '/profile', page: () => Profile()),
       ],
 
     );
   }
 }
+
+

@@ -9,6 +9,8 @@ import '../controllers/auth_controller.dart';
 import 'chat.dart';
 
 class EmployerChatHistoryView extends StatefulWidget {
+  const EmployerChatHistoryView({Key? key}) : super(key: key);
+
   @override
   _EmployerChatHistoryViewState createState() => _EmployerChatHistoryViewState();
 }
@@ -86,10 +88,10 @@ class _EmployerChatHistoryViewState extends State<EmployerChatHistoryView> {
         },
 
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(
-        pageController: pageController,
-        page: page,
-      ),
+      // bottomNavigationBar: CustomBottomNavigationBar(
+      //   pageController: pageController,
+      //   page: page,
+      // ),
     );
 
   }

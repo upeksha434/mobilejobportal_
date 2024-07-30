@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:mobilejobportal/views/employerChatHistoryView.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mobilejobportal/utils/http_client.dart';
+import '../bottomNavigation.dart';
 import '../layout.dart';
 import '../models/auth_user.dart';
 import '../views/login.dart';
@@ -42,7 +43,8 @@ class AuthController {
       userId = user.id;
 
       if(user.roleId==1)
-        Get.offAll(() => Layout());
+        //Get.offAll(() => Layout());
+        Get.offAll(()=>CustomBottomNavigationBar());
       else
         Get.offAll(() => EmployerChatHistoryView());
 
@@ -78,5 +80,18 @@ class AuthController {
     if (await shouldLogout()){
       logout();
     }
+  }
+
+  static Future<Map<String,dynamic>> getProfileInfo(String id) async {
+    final Response = await HttpClient.getProfileInfo(id);
+    print(Response.data);
+    print(Response.data.runtimeType);
+    return(Response.data );
+    if (Response.statusCode == 200) {
+      return Response.data;
+    } else {
+      throw Exception('Failed to load profile info');
+    }
+
   }
 }
