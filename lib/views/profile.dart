@@ -1,5 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:dio/dio.dart';
 import 'package:mobilejobportal/controllers/auth_controller.dart';
+import 'package:mobilejobportal/utils/http_client.dart';
 
 class Profile extends StatefulWidget {
   @override
@@ -11,6 +17,7 @@ class _ProfileState extends State<Profile> {
   int loggedInUserId = AuthController.userId;
   final AuthController authController = AuthController();
   late Map<String, dynamic> infoProfile;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -19,13 +26,45 @@ class _ProfileState extends State<Profile> {
   }
 
   void load() async {
-    print('fetching');
     final fetchedInfo = await AuthController.getProfileInfo(loggedInUserId.toString());
     setState(() {
       infoProfile = fetchedInfo;
       _isLoading = false;
-      print('fetched info $infoProfile');
     });
+  }
+
+  Future<void> _pickAndUploadImage() async {
+    if (await Permission.photos.request().isGranted) {
+      final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+
+      if (pickedFile != null) {
+        File file = File(pickedFile.path);
+        String fileName = file.path.split('/').last;
+
+        try {
+          FormData formData = FormData.fromMap({
+            "file": await MultipartFile.fromFile(file.path, filename: fileName),
+            "ext": fileName.split('.').last,
+          });
+
+          HttpResponse response = (await HttpClient.post('/auth/upload-new-profile-pic/${infoProfile['profilePicId']}', formData)) as HttpResponse;
+
+          if (response.statusCode == 200) {
+            // Update UI with new profile picture URL
+            setState(() {
+              infoProfile['profilePic'] = response.data['imageURL'];
+            });
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile picture updated successfully')));
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to update profile picture')));
+          }
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('An error occurred: $e')));
+        }
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Permission to access photos is required')));
+    }
   }
 
   @override
@@ -50,6 +89,11 @@ class _ProfileState extends State<Profile> {
                   fit: BoxFit.cover,
                 ),
               ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _pickAndUploadImage,
+              child: Text('Change Profile Picture'),
+            ),
             SizedBox(height: 16),
             Text('First Name: ${infoProfile['fname'] ?? 'N/A'}'),
             Text('Last Name: ${infoProfile['lname'] ?? 'N/A'}'),
