@@ -169,7 +169,9 @@ class HttpClient {
     }
   }
   static Future<HttpResponse> updateProfilePic(File file,id) async {
+    print('inside......');
     try{
+      //dio.options.headers['Content-Type'] = 'application/json';
       FormData formData = FormData.fromMap({
         "file": await MultipartFile.fromFile(
           file.path,
@@ -177,8 +179,18 @@ class HttpClient {
         ),
         "ext": ".${file.path.split('/').last.split('.').last}"
       });
-      //files/save-file-s3/
-      Response response = await post('/files/save-file.s3/${id}',formData);
+      dio.options.headers['Content-Type'] = 'multipart/form-data';
+
+      // Print the FormData details for debugging
+      print('FormData fields: ${formData.fields}');
+      print('FormData files: ${formData.files}');
+
+      Response response = await post('/files/upload-new-profile-pic/$id',formData);
+
+      print("... $response");
+      print("res ");
+      print(response.data);
+      print(response.statusCode);
       if(response.statusCode == 201){
         print('image uploaded successfully');
       }

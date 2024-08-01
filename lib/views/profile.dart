@@ -5,17 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:mobilejobportal/controllers/auth_controller.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:mobilejobportal/utils/http_client.dart';
-ispermissionallowed() async {
+
+Future<bool> isPermissionAllowed() async {
   var permissionStatus = await Permission.storage.request();
-  print("permission status");
-  print(permissionStatus);
   if (permissionStatus.isGranted) {
     return true;
-//permission granted
-  }else{
-    ispermissionallowed();
+  } else {
+    return false;
   }
-
 }
 
 class Profile extends StatefulWidget {
@@ -25,8 +22,8 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   File? file;
-  String fileName='';
-  String? path ='';
+  String fileName = '';
+  String? path = '';
   final TextEditingController fileNameController = TextEditingController();
   bool _isLoading = true;
   int loggedInUserId = AuthController.userId;
@@ -40,13 +37,25 @@ class _ProfileState extends State<Profile> {
   }
 
   void load() async {
-    print('fetching');
     final fetchedInfo = await AuthController.getProfileInfo(loggedInUserId.toString());
     setState(() {
       infoProfile = fetchedInfo;
       _isLoading = false;
-      print('fetched info $infoProfile');
     });
+  }
+
+  void _pickAndUploadImage() async {
+    final isPermissionGranted = await isPermissionAllowed();
+    if (!isPermissionGranted) return;
+
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    if (result != null) {
+      setState(() {
+        file = File(result.files.single.path!);
+        fileName = result.files.single.name;
+        fileNameController.text = fileName;
+      });
+    }
   }
 
   @override
@@ -60,70 +69,65 @@ class _ProfileState extends State<Profile> {
           : Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            if (infoProfile['profilePic'] != null)
-              Center(
-                child: Image.network(
-                  infoProfile['profilePic'],
-                  height: 100,
-                  width: 100,
-                  fit: BoxFit.cover,
+            Stack(
+              children: [
+                CircleAvatar(
+                  radius: 50,
+                  backgroundImage: file != null
+                      ? FileImage(file!)
+                      : infoProfile['profilePic'] != null
+                      ? NetworkImage(infoProfile['profilePic'])
+                      : AssetImage('assets/default_profile.png') as ImageProvider,
                 ),
-              ),
-            SizedBox(height: 16),
-
-            Container(
-              child:ElevatedButton(
-                onPressed:() async{
-                  final isPermissionGranted = await ispermissionallowed();
-                  print('permission $isPermissionGranted');
-
-                  if(!isPermissionGranted){
-                    return;
-                  }
-
-                  FilePickerResult? result = await FilePicker.platform.pickFiles();
-                  if (result != null){
-                    File file = File(result.files.single.path!);
-                    fileName = result.files.single.name;
-                    fileNameController.text = fileName;
-                  }
-                  else{
-                    print('User canceled file picking');
-                  }
-
-
-                },child: const Text('Choose File'),
-              ),
-
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: GestureDetector(
+                    onTap: _pickAndUploadImage,
+                    child: CircleAvatar(
+                      backgroundColor: Colors.white,
+                      child: Icon(
+                        Icons.camera_alt,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            Container(
-            child:
-              ElevatedButton(onPressed: () async {
-                if (file != null){
-                  HttpResponse response = await HttpClient.updateProfilePic(file!,{infoProfile['profilePicId']});
+            SizedBox(height: 16),
+            Text('Username', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(infoProfile['fname'] ?? 'N/A'),
+            SizedBox(height: 8),
+            Text('Birthday', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text('1st April, 2000'), // Use actual data here
+            SizedBox(height: 8),
+            Text('Location', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(infoProfile['location'] ?? 'N/A'),
+            SizedBox(height: 8),
+            Text('Email', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(infoProfile['email'] ?? 'N/A'),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () async {
+                if (file != null) {
+                  HttpResponse response = await HttpClient.updateProfilePic(file!, infoProfile['profilePicId'].toString());
+                  if (response.statusCode == 201) {
+                    setState(() {
+                      infoProfile['profilePic'] = response.data['imageURL'];
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile picture updated successfully')));
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to update profile picture')));
+                  }
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('No file selected')));
                 }
               },
-                child: Text('Upload'),),
+              child: Text('Upload profile Pic'),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: TextField(
-                controller: fileNameController,
-                decoration: const InputDecoration(
-                  border: InputBorder.none,
-                ),
-              ),
-            ),
-            Text('First Name: ${infoProfile['fname'] ?? 'N/A'}'),
-            Text('Last Name: ${infoProfile['lname'] ?? 'N/A'}'),
-            Text('Email: ${infoProfile['email'] ?? 'N/A'}'),
-            Text('Location: ${infoProfile['location'] ?? 'N/A'}'),
-            Text('Job Type: ${infoProfile['jobType'] ?? 'N/A'}'),
-            Text('Profile Description: ${infoProfile['profileDescription'] ?? 'N/A'}'),
-            Text('Hourly Rate: ${infoProfile['hourlyRate'] ?? 'N/A'}'),
-            Text('Verified: ${infoProfile['isVerified'] ? 'Yes' : 'No'}'),
           ],
         ),
       ),
