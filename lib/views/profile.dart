@@ -1,11 +1,21 @@
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:dio/dio.dart';
 import 'package:mobilejobportal/controllers/auth_controller.dart';
-import 'package:mobilejobportal/utils/http_client.dart';
+import 'package:permission_handler/permission_handler.dart';
+ispermissionallowed() async {
+  var permissionStatus = await Permission.storage.request();
+  print("permission status");
+  print(permissionStatus);
+  if (permissionStatus.isGranted) {
+    return true;
+//permission granted
+  }else{
+    ispermissionallowed();
+  }
+
+}
 
 class Profile extends StatefulWidget {
   @override
@@ -13,11 +23,14 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  File? file;
+  String fileName='';
+  String? path ='';
+  final TextEditingController fileNameController = TextEditingController();
   bool _isLoading = true;
   int loggedInUserId = AuthController.userId;
   final AuthController authController = AuthController();
   late Map<String, dynamic> infoProfile;
-  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -26,45 +39,13 @@ class _ProfileState extends State<Profile> {
   }
 
   void load() async {
+    print('fetching');
     final fetchedInfo = await AuthController.getProfileInfo(loggedInUserId.toString());
     setState(() {
       infoProfile = fetchedInfo;
       _isLoading = false;
+      print('fetched info $infoProfile');
     });
-  }
-
-  Future<void> _pickAndUploadImage() async {
-    if (await Permission.photos.request().isGranted) {
-      final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-
-      if (pickedFile != null) {
-        File file = File(pickedFile.path);
-        String fileName = file.path.split('/').last;
-
-        try {
-          FormData formData = FormData.fromMap({
-            "file": await MultipartFile.fromFile(file.path, filename: fileName),
-            "ext": fileName.split('.').last,
-          });
-
-          HttpResponse response = (await HttpClient.post('/auth/upload-new-profile-pic/${infoProfile['profilePicId']}', formData)) as HttpResponse;
-
-          if (response.statusCode == 200) {
-            // Update UI with new profile picture URL
-            setState(() {
-              infoProfile['profilePic'] = response.data['imageURL'];
-            });
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile picture updated successfully')));
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to update profile picture')));
-          }
-        } catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('An error occurred: $e')));
-        }
-      }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Permission to access photos is required')));
-    }
   }
 
   @override
@@ -90,11 +71,31 @@ class _ProfileState extends State<Profile> {
                 ),
               ),
             SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _pickAndUploadImage,
-              child: Text('Change Profile Picture'),
+
+            Container(
+              child:ElevatedButton(
+                onPressed:() async{
+                  final isPermissionGranted = await ispermissionallowed();
+                  print('permission $isPermissionGranted');
+
+                  if(!isPermissionGranted){
+                    return;
+                  }
+
+                  FilePickerResult? result = await FilePicker.platform.pickFiles();
+                  if (result != null){
+                    File file = File(result.files.single.path!);
+                    fileName = result.files.single.name;
+                    fileNameController.text = fileName;
+                  }
+                  else{
+                    print('User canceled file picking');
+                  }
+
+
+                },child: const Text('Choose File'),
+              )
             ),
-            SizedBox(height: 16),
             Text('First Name: ${infoProfile['fname'] ?? 'N/A'}'),
             Text('Last Name: ${infoProfile['lname'] ?? 'N/A'}'),
             Text('Email: ${infoProfile['email'] ?? 'N/A'}'),
