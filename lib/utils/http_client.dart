@@ -168,6 +168,33 @@ class HttpClient {
           statusCode: e.response?.statusCode ?? 500);
     }
   }
+  static Future<HttpResponse> updateProfilePic(File file,id) async {
+    try{
+      FormData formData = FormData.fromMap({
+        "file": await MultipartFile.fromFile(
+          file.path,
+          filename:' file.${file.path.split('/').last.split('.').last}'
+        ),
+        "ext": ".${file.path.split('/').last.split('.').last}"
+      });
+      //files/save-file-s3/
+      Response response = await post('/files/save-file.s3/${id}',formData);
+      if(response.statusCode == 201){
+        print('image uploaded successfully');
+      }
+      else{
+        print('Error uploading file');
+      }
+
+      return HttpResponse(
+        data:response.data,
+        statusCode: response.statusCode ?? 500,
+      );
+    }
+    on DioException catch(e){
+      return HttpResponse(statusCode: e.response?.statusCode??500,);
+    }
+  }
 
 
 

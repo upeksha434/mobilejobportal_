@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:mobilejobportal/controllers/auth_controller.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:mobilejobportal/utils/http_client.dart';
 ispermissionallowed() async {
   var permissionStatus = await Permission.storage.request();
   print("permission status");
@@ -94,7 +95,26 @@ class _ProfileState extends State<Profile> {
 
 
                 },child: const Text('Choose File'),
-              )
+              ),
+
+            ),
+            Container(
+            child:
+              ElevatedButton(onPressed: () async {
+                if (file != null){
+                  HttpResponse response = await HttpClient.updateProfilePic(file!,{infoProfile['profilePicId']});
+                }
+              },
+                child: Text('Upload'),),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: TextField(
+                controller: fileNameController,
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                ),
+              ),
             ),
             Text('First Name: ${infoProfile['fname'] ?? 'N/A'}'),
             Text('Last Name: ${infoProfile['lname'] ?? 'N/A'}'),
