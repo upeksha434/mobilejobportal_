@@ -94,4 +94,17 @@ class AuthController {
     }
 
   }
+//  updateProfileInfo(Map data,id)
+
+  static Future<void> updateProfileInfo(Map data, id) async {
+    final Response = await HttpClient.updateProfileInfo(data,id);
+    print(Response.data);
+    print(Response.data.runtimeType);
+    if (Response.statusCode == 200) {
+      return Response.data;
+    } else {
+      throw Exception('Failed to load profile info');
+    }
+
+  }
 }

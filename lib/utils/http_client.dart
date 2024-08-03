@@ -168,6 +168,25 @@ class HttpClient {
           statusCode: e.response?.statusCode ?? 500);
     }
   }
+
+  static Future<HttpResponse> updateProfileInfo(Map data,id) async {
+    try {
+      dio.options.headers['Content-Type'] = 'application/json';
+      // updateProfile/:id
+      Response response = await post('/auth/updateProfile/${id}', data);
+      return HttpResponse(
+          data: response.data, statusCode: response.statusCode ?? 500);
+    } on DioException catch (e) {
+      print(e);
+      print("error");
+      return HttpResponse(
+          data: e.response?.data,
+          statusCode: e.response?.statusCode ?? 500);
+    }
+  }
+
+
+
   static Future<HttpResponse> updateProfilePic(File file,id) async {
     print('inside......');
     try{
@@ -184,8 +203,11 @@ class HttpClient {
       // Print the FormData details for debugging
       print('FormData fields: ${formData.fields}');
       print('FormData files: ${formData.files}');
+      Response re = await get('/employee/getEmployeeRatings/1');
+      print(re.data);
 
-      Response response = await post('/files/upload-new-profile-pic/$id',formData);
+      Response response = await post('/files/uploadNewProfilePic/$id',formData);
+
 
       print("... $response");
       print("res ");
