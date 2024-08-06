@@ -39,6 +39,7 @@ class _ProfileState extends State<Profile> {
   final TextEditingController emailController = TextEditingController();
 
   bool isEditing = false;
+  bool isUploadNewImage = false;
 
   @override
   void initState() {
@@ -66,6 +67,11 @@ class _ProfileState extends State<Profile> {
   }
 
   void _pickAndUploadImage() async {
+
+      setState(() {
+        isUploadNewImage = !isUploadNewImage;
+      });
+
     final isPermissionGranted = await isPermissionAllowed();
     if (!isPermissionGranted) return;
 
@@ -135,7 +141,10 @@ class _ProfileState extends State<Profile> {
                       child: Icon(
                         Icons.camera_alt,
                         color: Colors.black,
+
                       ),
+
+
                     ),
                   ),
                 ),
@@ -166,6 +175,7 @@ class _ProfileState extends State<Profile> {
               SizedBox(height: 8),
               _buildEditableField('Email', emailController),
               SizedBox(height: 16),],
+    if( isUploadNewImage) ...[
             ElevatedButton(
               onPressed: () async {
                 if (file != null) {
@@ -183,12 +193,16 @@ class _ProfileState extends State<Profile> {
                 }
               },
               child: Text('Upload profile Pic'),
-            ),
+            ),],
             SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _updateProfileInfo,
-              child: Text('Update Profile Info'),
-            ),
+            if(isEditing)...[
+              ElevatedButton(
+
+                onPressed: _updateProfileInfo,
+                child: Text('Update Profile Info'),
+              ),
+            ],
+
           ],
         ),
       ),),
