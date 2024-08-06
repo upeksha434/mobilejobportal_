@@ -30,6 +30,16 @@ class _ProfileState extends State<Profile> {
   final AuthController authController = AuthController();
   late Map<String, dynamic> infoProfile;
 
+  final TextEditingController fnameController = TextEditingController();
+  final TextEditingController lnameController = TextEditingController();
+  final TextEditingController profileDescriptionController = TextEditingController();
+  final TextEditingController locationController = TextEditingController();
+  final TextEditingController hourlyRateController = TextEditingController();
+  final TextEditingController jobTypeController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+
+  bool isEditing = false;
+
   @override
   void initState() {
     super.initState();
@@ -41,6 +51,17 @@ class _ProfileState extends State<Profile> {
     setState(() {
       infoProfile = fetchedInfo;
       _isLoading = false;
+
+      // Initialize controllers with fetched info
+      fnameController.text = infoProfile['fname'] ?? '';
+      lnameController.text = infoProfile['lname'] ?? '';
+      profileDescriptionController.text = infoProfile['profileDescription'] ?? '';
+      locationController.text = infoProfile['location'] ?? '';
+      hourlyRateController.text = infoProfile['hourlyRate'] ?? '';
+      jobTypeController.text = infoProfile['jobType'] ?? '';
+      emailController.text = infoProfile['email'] ?? '';
+      print(fnameController.text);
+      print(infoProfile['roleId']==2 );
     });
   }
 
@@ -58,13 +79,36 @@ class _ProfileState extends State<Profile> {
     }
   }
 
+  void _updateProfileInfo() async {
+    Map<String, dynamic> updatedData = {
+      'fname': fnameController.text,
+      'lname': lnameController.text,
+      'profileDescription': profileDescriptionController.text,
+      'location': locationController.text,
+      'hourlyRate': hourlyRateController.text,
+      'jobType': jobTypeController.text,
+      'email': emailController.text,
+    };
+
+    try {
+      await AuthController.updateProfileInfo(updatedData, loggedInUserId);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile updated successfully')));
+      load(); // Reload to update the profile info
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to update profile')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Profile'),
       ),
-      body: _isLoading
+      body:
+      SingleChildScrollView(
+      child:
+      _isLoading
           ? Center(child: CircularProgressIndicator())
           : Padding(
         padding: const EdgeInsets.all(16.0),
@@ -97,19 +141,31 @@ class _ProfileState extends State<Profile> {
                 ),
               ],
             ),
-            SizedBox(height: 16),
-            Text('Username', style: TextStyle(fontWeight: FontWeight.bold)),
-            Text(infoProfile['fname'] ?? 'N/A'),
-            SizedBox(height: 8),
-            Text('Birthday', style: TextStyle(fontWeight: FontWeight.bold)),
-            Text('1st April, 2000'), // Use actual data here
-            SizedBox(height: 8),
-            Text('Location', style: TextStyle(fontWeight: FontWeight.bold)),
-            Text(infoProfile['location'] ?? 'N/A'),
-            SizedBox(height: 8),
-            Text('Email', style: TextStyle(fontWeight: FontWeight.bold)),
-            Text(infoProfile['email'] ?? 'N/A'),
-            SizedBox(height: 16),
+            if(infoProfile['roleId']==1)...[
+              SizedBox(height: 16),
+              _buildEditableField('First name', fnameController),
+              SizedBox(height: 8),
+              _buildEditableField('Last name', lnameController),
+              SizedBox(height: 8),
+              _buildEditableField('Profile', profileDescriptionController),
+              SizedBox(height: 8),
+              _buildEditableField('Email', emailController),],
+            if(infoProfile['roleId']==2) ...[
+              SizedBox(height: 16),
+              _buildEditableField('First name', fnameController),
+              SizedBox(height: 8),
+              _buildEditableField('Last name', lnameController),
+              SizedBox(height: 8),
+              _buildEditableField('Profile', profileDescriptionController),
+              SizedBox(height: 8),
+              _buildEditableField('Location', locationController),
+              SizedBox(height: 8),
+              _buildEditableField('Hourly rate', hourlyRateController),
+              SizedBox(height: 8),
+              _buildEditableField('Job Category', jobTypeController),
+              SizedBox(height: 8),
+              _buildEditableField('Email', emailController),
+              SizedBox(height: 16),],
             ElevatedButton(
               onPressed: () async {
                 if (file != null) {
@@ -128,9 +184,39 @@ class _ProfileState extends State<Profile> {
               },
               child: Text('Upload profile Pic'),
             ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _updateProfileInfo,
+              child: Text('Update Profile Info'),
+            ),
           ],
         ),
-      ),
+      ),),
+    );
+  }
+
+  Widget _buildEditableField(String label, TextEditingController controller) {
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              labelText: label,
+              border: OutlineInputBorder(),
+            ),
+            enabled: isEditing,
+          ),
+        ),
+        IconButton(
+          icon: Icon(Icons.edit),
+          onPressed: () {
+            setState(() {
+              isEditing = !isEditing;
+            });
+          },
+        ),
+      ],
     );
   }
 }

@@ -173,7 +173,8 @@ class HttpClient {
     try {
       dio.options.headers['Content-Type'] = 'application/json';
       // updateProfile/:id
-      Response response = await post('/auth/updateProfile/${id}', data);
+      //Response response = await post('/auth/updateProfile/${id}', data);
+      Response response = data as Response;
       return HttpResponse(
           data: response.data, statusCode: response.statusCode ?? 500);
     } on DioException catch (e) {
