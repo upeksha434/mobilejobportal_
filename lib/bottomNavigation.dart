@@ -41,7 +41,7 @@
 // }
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:unicons/unicons.dart';
 import 'package:mobilejobportal/layout.dart';
 import 'package:mobilejobportal/views/profile.dart';
 
@@ -64,24 +64,25 @@ class _CustomBottomNavigationBar extends State<CustomBottomNavigationBar>{
       body:_screens[_currentIndex],
       bottomNavigationBar:BottomNavigationBar(
       backgroundColor: Colors.white60,
-      //currentIndex:_currentIndex,
+      currentIndex:_currentIndex,
 
       onTap: (index) {
         setState(() {
           _currentIndex = index;
+          print('$index index');
 
         });
       },
       elevation: 1,
       items: const [
         BottomNavigationBarItem(
-          icon: Icon(Icons.person),
-          label: 'Profile',
+          icon: Icon(UniconsLine.rss_alt),
+          label: 'Services',
 
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.subscriptions),
-          label: 'Submissions',
+          icon: Icon(UniconsLine.user_square),
+          label: 'Profile',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.subscriptions),
@@ -90,6 +91,7 @@ class _CustomBottomNavigationBar extends State<CustomBottomNavigationBar>{
       ],
       selectedItemColor: const Color(0xff2772F0),
       unselectedItemColor: Colors.grey,
+
     ),
     );
   }
