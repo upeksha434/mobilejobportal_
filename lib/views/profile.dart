@@ -21,6 +21,8 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  String _commonErrorText='';
+  String _emailErrorText='';
   File? file;
   String fileName = '';
   String? path = '';
@@ -29,6 +31,7 @@ class _ProfileState extends State<Profile> {
   int loggedInUserId = AuthController.userId;
   final AuthController authController = AuthController();
   late Map<String, dynamic> infoProfile;
+
 
   final TextEditingController fnameController = TextEditingController();
   final TextEditingController lnameController = TextEditingController();
@@ -54,24 +57,19 @@ class _ProfileState extends State<Profile> {
       _isLoading = false;
 
       // Initialize controllers with fetched info
-      fnameController.text = infoProfile['fname'] ?? '';
-      lnameController.text = infoProfile['lname'] ?? '';
-      profileDescriptionController.text = infoProfile['profileDescription'] ?? '';
+      fnameController.text = infoProfile['fname'] ;
+      lnameController.text = infoProfile['lname'] ;
+      profileDescriptionController.text = infoProfile['profileDescription'] ;
       locationController.text = infoProfile['location'] ?? '';
       hourlyRateController.text = infoProfile['hourlyRate'] ?? '';
       jobTypeController.text = infoProfile['jobType'] ?? '';
-      emailController.text = infoProfile['email'] ?? '';
+      emailController.text = infoProfile['email'] ;
       print(fnameController.text);
       print(infoProfile['roleId']==2 );
     });
   }
 
   void _pickAndUploadImage() async {
-
-      setState(() {
-        isUploadNewImage = !isUploadNewImage;
-      });
-
     final isPermissionGranted = await isPermissionAllowed();
     if (!isPermissionGranted) return;
 
@@ -81,6 +79,10 @@ class _ProfileState extends State<Profile> {
         file = File(result.files.single.path!);
         fileName = result.files.single.name;
         fileNameController.text = fileName;
+        if (file != null)
+          setState(() {
+            isUploadNewImage = true;
+          });
       });
     }
   }
@@ -95,6 +97,7 @@ class _ProfileState extends State<Profile> {
       'jobType': jobTypeController.text,
       'email': emailController.text,
     };
+    print(updatedData);
 
     try {
       await AuthController.updateProfileInfo(updatedData, loggedInUserId);
@@ -103,6 +106,40 @@ class _ProfileState extends State<Profile> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to update profile')));
     }
+  }
+
+  void _validateText(String value){
+    if(value.isEmpty){
+      setState(() {
+        _commonErrorText = 'This field is required';
+      });
+    }
+    else{
+      setState(() {
+        _commonErrorText = '';
+      });
+    }
+  }
+
+  void _validateEmail(String value){
+    if(value.isEmpty){
+      setState((){
+        _emailErrorText = 'This field is required';
+      });
+    }
+    else if(!isEmailValid(value)){
+      setState((){
+        _emailErrorText = 'Invalid email';
+      });
+    }
+    else{
+      setState((){
+        _emailErrorText = '';
+      });
+    }
+  }
+  bool isEmailValid(String email){
+    return RegExp(r'^[\w-\.]+@[a-zA-Z]+\.[a-zA-Z]{2,}$').hasMatch(email);
   }
 
   @override
@@ -159,6 +196,7 @@ class _ProfileState extends State<Profile> {
               _buildEditableField('Profile', profileDescriptionController),
               SizedBox(height: 8),
               _buildEditableField('Email', emailController),],
+
             if(infoProfile['roleId']==2) ...[
               SizedBox(height: 16),
               _buildEditableField('First name', fnameController),
@@ -213,12 +251,22 @@ class _ProfileState extends State<Profile> {
     return Row(
       children: [
         Expanded(
-          child: TextField(
+          child: TextFormField(
             controller: controller,
             decoration: InputDecoration(
               labelText: label,
+              errorText: label == 'Email' ? _emailErrorText : _commonErrorText,
               border: OutlineInputBorder(),
             ),
+            validator:(value)=> label == 'Email' ? _emailErrorText : _commonErrorText,
+            onChanged: (value) {
+              if(label == 'Email'){
+                _validateEmail(value);
+              }
+              else{
+                _validateText(value);
+              }
+            },
             enabled: isEditing,
           ),
         ),

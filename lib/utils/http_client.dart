@@ -26,6 +26,9 @@ class HttpClient {
   static Future<Response> get(String path) async {
     return await dio.get(path);
   }
+  static Future<Response> put(String path, dynamic data) async {
+    return await dio.put(path, data: data);
+  }
   static Future<Response> post(String path, dynamic data) async {
     return await dio.post(path, data: data);
   }
@@ -173,8 +176,8 @@ class HttpClient {
     try {
       dio.options.headers['Content-Type'] = 'application/json';
       // updateProfile/:id
-      //Response response = await post('/auth/updateProfile/${id}', data);
-      Response response = data as Response;
+      Response response = await put('/auth/updateProfile/${id}', data);
+
       return HttpResponse(
           data: response.data, statusCode: response.statusCode ?? 500);
     } on DioException catch (e) {
