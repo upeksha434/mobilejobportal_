@@ -37,8 +37,11 @@ class ChatController {
   }
 
   Future<List>getEmployeeChats() async{
+    print(AuthController.userId);
+    print(AuthController.user.roleId);
     final response = await HttpClient.getEmployeeChatcards({
       'employeeId': AuthController.userId,
+      'roleId': AuthController.user.roleId,
     });
     if (response.statusCode == 201) {
       print(response.data);
