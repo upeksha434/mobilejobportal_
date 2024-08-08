@@ -44,8 +44,8 @@ class _CustomBottomNavigationBar extends State<CustomBottomNavigationBar>{
           label: 'Profile',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.subscriptions),
-          label: 'Submissions2',
+          icon: Icon(UniconsLine.comment_dots),
+          label: 'Chat',
         ),
       ],
       selectedItemColor: const Color(0xff2772F0),

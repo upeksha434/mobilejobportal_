@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:mobilejobportal/auth/auth.dart';
 import 'package:mobilejobportal/controllers/chat_controller.dart';
 import 'package:mobilejobportal/utils/http_client.dart';
-
-import '../bottomNavigation.dart';
 import '../controllers/auth_controller.dart';
 import 'chat.dart';
 
@@ -48,7 +45,7 @@ class _EmployerChatHistoryViewState extends State<EmployerChatHistoryView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Chat Histories')),
+      appBar: AppBar(title: Text('Chat History')),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : _chatHistories.isEmpty
